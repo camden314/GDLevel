@@ -49,6 +49,7 @@ namespace GD {
 		int uploadLevel(std::string username,std::string password);
 		operator std::string();
 		Level& operator= (const std::string& str);
-
+		static Level& downloadLevel(int levelID);
+		static Level& downloadLevel(std::string levelID);
 	};
 }

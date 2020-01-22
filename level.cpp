@@ -185,4 +185,15 @@ namespace GD {
 		LevelOptions options;
 		return uploadLevel(username,password,options);
 	}
+	Level& Level::downloadLevel(std::string levelID) {
+		std::string query = "gameVersion=21&binaryVersion=35&gdw=0&levelID="+levelID+"&inc=0&extras=0&secret=Wmfd2893gb7";
+		std::string reqOutput = httpRequest("/database/downloadGJLevel22.php",query);
+		GDCrypto::LevelDecoder level_decoder;
+		Level* l = new Level();
+		*l = (level_decoder << split(reqOutput,':')[7]).digestAsString();
+		return *l;
+;	}
+	Level& Level::downloadLevel(int levelID) {
+		return Level::downloadLevel(std::to_string(levelID));
+	}
 }
