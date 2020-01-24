@@ -1,5 +1,5 @@
 #include <string>
-#include <map>
+#include <unordered_map>
 namespace GD::BlockAttrs {
 const std::string COLOR_1_9="19";
 const std::string GREEN="8";
@@ -114,5 +114,5 @@ const std::string FADE_IN="kA15";
 const std::string MUSIC_LINES="kA14";
 }
 namespace GD {
-	const std::map<std::string,std::string> DefaultHeader = {{HeaderAttrs::COLORS,"1_40_2_125_3_255_11_255_12_255_13_255_4_-1_6_1000_7_1_15_1_18_0_8_1|1_0_2_102_3_255_11_255_12_255_13_255_4_-1_6_1001_7_1_15_1_18_0_8_1|1_0_2_102_3_255_11_255_12_255_13_255_4_-1_6_1009_7_1_15_1_18_0_8_1|1_255_2_255_3_255_11_255_12_255_13_255_4_-1_6_1002_5_1_7_1_15_1_18_0_8_1|1_0_2_255_3_125_11_255_12_255_13_255_4_-1_6_1005_5_1_7_1_15_1_18_0_8_1|1_0_2_255_3_125_11_255_12_255_13_255_4_-1_6_1006_5_1_7_1_15_1_18_0_8_1|1_0_2_0_3_0_11_255_12_255_13_255_4_-1_6_3_7_1_15_1_18_0_8_1|"},{HeaderAttrs::SONG_OFFSET,"0"},{HeaderAttrs::FADE_IN,"0"},{HeaderAttrs::FADE_OUT,"0"},{HeaderAttrs::MUSIC_LINES,""},{HeaderAttrs::BACKGROUND,"1"}, {HeaderAttrs::GROUND,"0"}, {HeaderAttrs::GROUND_LINE,"0"}, {HeaderAttrs::FONT,"0"},{HeaderAttrs::VEHICLE,"0"},{HeaderAttrs::MINI,"0"},{HeaderAttrs::DUAL,"0"},{HeaderAttrs::SPEED,"0"}};
+	const std::unordered_map<std::string,std::string> DefaultHeader = {{HeaderAttrs::COLORS,"1_40_2_125_3_255_11_255_12_255_13_255_4_-1_6_1000_7_1_15_1_18_0_8_1|1_0_2_102_3_255_11_255_12_255_13_255_4_-1_6_1001_7_1_15_1_18_0_8_1|1_0_2_102_3_255_11_255_12_255_13_255_4_-1_6_1009_7_1_15_1_18_0_8_1|1_255_2_255_3_255_11_255_12_255_13_255_4_-1_6_1002_5_1_7_1_15_1_18_0_8_1|1_0_2_255_3_125_11_255_12_255_13_255_4_-1_6_1005_5_1_7_1_15_1_18_0_8_1|1_0_2_255_3_125_11_255_12_255_13_255_4_-1_6_1006_5_1_7_1_15_1_18_0_8_1|1_0_2_0_3_0_11_255_12_255_13_255_4_-1_6_3_7_1_15_1_18_0_8_1|"},{HeaderAttrs::SONG_OFFSET,"0"},{HeaderAttrs::FADE_IN,"0"},{HeaderAttrs::FADE_OUT,"0"},{HeaderAttrs::MUSIC_LINES,""},{HeaderAttrs::BACKGROUND,"1"}, {HeaderAttrs::GROUND,"0"}, {HeaderAttrs::GROUND_LINE,"0"}, {HeaderAttrs::FONT,"0"},{HeaderAttrs::VEHICLE,"0"},{HeaderAttrs::MINI,"0"},{HeaderAttrs::DUAL,"0"},{HeaderAttrs::SPEED,"0"}};
 }

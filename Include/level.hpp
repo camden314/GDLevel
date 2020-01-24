@@ -1,6 +1,6 @@
 #include "blockattrs.hpp"
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <vector>
 namespace GD {
 	typedef struct LevelOptions {
@@ -15,7 +15,7 @@ namespace GD {
 	} LevelOptions;
 	class Block {
 	private:
-		std::map<std::string,std::string> attributes;
+		std::unordered_map<std::string,std::string> attributes;
 	public:
 		Block();
 		Block(int blockID,int xPosition,int yPosition);
@@ -23,20 +23,20 @@ namespace GD {
 		std::string& operator [] (std::string attribute);
 		operator std::string();
 		Block& operator= (const std::string& str);
-		Block& operator= (const std::map<std::string,std::string>& attrs);
-		Block& operator += (const std::map<std::string,std::string>& attrs);
+		Block& operator= (const std::unordered_map<std::string,std::string>& attrs);
+		Block& operator += (const std::unordered_map<std::string,std::string>& attrs);
 
 	};
 	class Header {
 	private:
-		std::map<std::string,std::string> attributes;
+		std::unordered_map<std::string,std::string> attributes;
 	public:
 		Header();
 		std::string& operator [] (std::string attribute);
 		operator std::string();
-		Header& operator = (const std::map<std::string,std::string>& attrs);
+		Header& operator = (const std::unordered_map<std::string,std::string>& attrs);
 		Header& operator= (const std::string& str);
-		Header& operator += (const std::map<std::string,std::string>& attrs);
+		Header& operator += (const std::unordered_map<std::string,std::string>& attrs);
 	};
 	class Level {
 	public:

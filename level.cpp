@@ -6,24 +6,26 @@
 #include <vector>
 #include <iterator>
 #include <assert.h>
-std::map<std::string,std::string> splitToMap(const std::string &s, char delim) {
+std::unordered_map<std::string,std::string> splitToMap(const std::string &s, char delim) {
     std::istringstream iss(s);
     std::string item;
     std::string item2;
-    std::map<std::string,std::string> out;
+    std::unordered_map<std::string,std::string> out;
     while (std::getline(iss, item, delim) && std::getline(iss, item2, delim)) {
         out[item] = item2;
     }
     return out;
 }
-std::vector<std::string> split(const std::string &s, char delim) {
-    std::istringstream iss(s);
-    std::string item;
-    std::vector<std::string> out;
-    while (std::getline(iss, item, delim)) {
-        out.push_back(item);
+std::vector<std::string> split(std::string const &in, char sep) {
+    std::string::size_type b = 0;
+    std::vector<std::string> result;
+
+    while ((b = in.find_first_not_of(sep, b)) != std::string::npos) {
+        auto e = in.find_first_of(sep, b);
+        result.push_back(in.substr(b, e-b));
+        b = e;
     }
-    return out;
+    return result;
 }
 std::string httpRequest(std::string url,std::string params) {
 	httplib::Client cli("boomlings.com", 80);
@@ -78,11 +80,11 @@ namespace GD {
 		attributes = splitToMap(str,',');
 		return *this;
 	}
-	Block& Block::operator= (const std::map<std::string,std::string>& attrs) {
+	Block& Block::operator= (const std::unordered_map<std::string,std::string>& attrs) {
 		this->attributes = attrs;
 		return *this;
 	}
-	Block& Block::operator += (const std::map<std::string,std::string>& attrs) {
+	Block& Block::operator += (const std::unordered_map<std::string,std::string>& attrs) {
 		for(auto& [key, val] : attrs) {
 			this->attributes[key] = val;
 		}
@@ -122,11 +124,11 @@ namespace GD {
 		attributes = splitToMap(str,',');
 		return *this;
 	}
-	Header& Header::operator= (const std::map<std::string,std::string>& attrs) {
+	Header& Header::operator= (const std::unordered_map<std::string,std::string>& attrs) {
 		this->attributes = attrs;
 		return *this;
 	}
-	Header& Header::operator += (const std::map<std::string,std::string>& attrs) {
+	Header& Header::operator += (const std::unordered_map<std::string,std::string>& attrs) {
 		for(auto& [key, val] : attrs) {
 			this->attributes[key] = val;
 		}
@@ -157,11 +159,12 @@ namespace GD {
 		std::vector<std::string> stuff = split(str,';');
 		this->header = stuff[0];
 		stuff.erase(stuff.begin());
+		this->blocks.reserve(stuff.size());
 		for(std::string objstr : stuff) {
 			if(objstr.size()) {
 				Block blk;
 				blk = objstr;
-				this->blocks.push_back(blk);
+				this->blocks.emplace_back(blk);
 			}
 		}
 		return *this;
