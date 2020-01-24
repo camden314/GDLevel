@@ -3,4 +3,4 @@ A C++ level api for Geometry Dash. Requires GDCrypto
 # IMPORTANT: 
 needs to be compiled with `-std=c++17` or it will not work
 
-![alt text](https://i.imgur.com/msV6Z3g.png "alt text")
+![alt text](https://i.imgur.com/DlqHPUb.png "alt text")
