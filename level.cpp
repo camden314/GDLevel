@@ -6,6 +6,8 @@
 #include <vector>
 #include <iterator>
 #include <assert.h>
+
+using namespace GD;
 std::unordered_map<std::string,std::string> splitToMap(const std::string &s, char delim) {
     std::istringstream iss(s);
     std::string item;
@@ -16,15 +18,15 @@ std::unordered_map<std::string,std::string> splitToMap(const std::string &s, cha
     }
     return out;
 }
-std::vector<std::string> split(std::string const &in, char sep) {
-    std::string::size_type b = 0;
+std::vector<std::string> split (const std::string &s, char delim) {
     std::vector<std::string> result;
+    std::stringstream ss (s);
+    std::string item;
 
-    while ((b = in.find_first_not_of(sep, b)) != std::string::npos) {
-        auto e = in.find_first_of(sep, b);
-        result.push_back(in.substr(b, e-b));
-        b = e;
+    while (getline (ss, item, delim)) {
+        result.push_back (item);
     }
+
     return result;
 }
 std::string httpRequest(std::string url,std::string params) {
@@ -72,131 +74,151 @@ std::string buildUploadQueryString(GD::LevelOptions options,std::string username
 	return out;
 
 }
-namespace GD {
-	std::string& Block::operator [] (std::string attribute) {
-		return this->attributes[attribute];
+std::string& Block::operator [] (std::string attribute) {
+	return this->attributes[attribute];
+}
+Block& Block::operator= (const std::string& str) {
+	attributes = splitToMap(str,',');
+	return *this;
+}
+Block& Block::operator= (const std::unordered_map<std::string,std::string>& attrs) {
+	this->attributes = attrs;
+	return *this;
+}
+Block& Block::operator += (const std::unordered_map<std::string,std::string>& attrs) {
+	for(auto& [key, val] : attrs) {
+		this->attributes[key] = val;
 	}
-	Block& Block::operator= (const std::string& str) {
-		attributes = splitToMap(str,',');
-		return *this;
+
+	return *this;
+}
+Block::Block() {
+	this->attributes[BlockAttrs::BLOCK_ID] = "0";
+	this->attributes[BlockAttrs::X_POSITION] = "0";
+	this->attributes[BlockAttrs::Y_POSITION] = "0";
+}
+Block::Block(int blockID,int xPosition,int yPosition) {
+	this->attributes[BlockAttrs::BLOCK_ID] = std::to_string(blockID);
+	this->attributes[BlockAttrs::X_POSITION] = std::to_string(xPosition);
+	this->attributes[BlockAttrs::Y_POSITION] = std::to_string(yPosition);
+}
+Block::Block(std::string blockID,std::string xPosition,std::string yPosition) {
+	this->attributes[BlockAttrs::BLOCK_ID] = blockID;
+	this->attributes[BlockAttrs::X_POSITION] = xPosition;
+	this->attributes[BlockAttrs::Y_POSITION] = yPosition;
+}
+
+Block::operator std::string() {
+	std::string out;
+	for(auto& [key, val] : this->attributes) {
+		out += key+std::string(",")+val+std::string(",");
 	}
-	Block& Block::operator= (const std::unordered_map<std::string,std::string>& attrs) {
-		this->attributes = attrs;
-		return *this;
+	out.pop_back();
+	return out;
+}
+
+Block::operator std::unordered_map<std::string,std::string>() {
+	return this->attributes;
+}
+
+std::string& Header::operator [] (std::string attribute) {
+	return this->attributes[attribute];
+}
+Header& Header::operator= (const std::string& str) {
+	attributes = splitToMap(str,',');
+	return *this;
+}
+Header& Header::operator= (const std::unordered_map<std::string,std::string>& attrs) {
+	this->attributes = attrs;
+	return *this;
+}
+Header& Header::operator += (const std::unordered_map<std::string,std::string>& attrs) {
+	for(auto& [key, val] : attrs) {
+		this->attributes[key] = val;
 	}
-	Block& Block::operator += (const std::unordered_map<std::string,std::string>& attrs) {
-		for(auto& [key, val] : attrs) {
-			this->attributes[key] = val;
+	return *this;
+}
+Header::Header() {
+	this->attributes = GD::DefaultHeader;
+}
+Header::operator std::string() {
+	std::string out;
+	for(auto& [key, val] : this->attributes) {
+		out += key+std::string(",")+val+std::string(",");
+	}
+	out.pop_back();
+	return out;
+}
+
+
+Level::Level(std::string levelName) {
+	this->levelName = levelName;
+}
+
+void Level::addBlock(Block* b) {
+	this->blocks.push_back(b);
+}
+
+Level& Level::operator= (const std::string& str) {
+	std::vector<std::string> stuff = split(str,';');
+	this->header = stuff[0];
+	stuff.erase(stuff.begin());
+	this->blocks.reserve(stuff.size());
+	for(std::string objstr : stuff) {
+		if(objstr.size()) {
+			Block* blk = new Block();
+			*blk = objstr;
+			this->blocks.emplace_back(blk);
 		}
+	}
+	return *this;
+}
 
-		return *this;
+Level::operator std::string() {
+	std::string strbuild = this->header;
+	strbuild+=";";
+	for(Block* blk : this->blocks) {
+		strbuild += *blk;
+		strbuild += ";";
 	}
-	Block::Block() {
-		this->attributes[BlockAttrs::BLOCK_ID] = "0";
-		this->attributes[BlockAttrs::X_POSITION] = "0";
-		this->attributes[BlockAttrs::Y_POSITION] = "0";
-	}
-	Block::Block(int blockID,int xPosition,int yPosition) {
-		this->attributes[BlockAttrs::BLOCK_ID] = std::to_string(blockID);
-		this->attributes[BlockAttrs::X_POSITION] = std::to_string(xPosition);
-		this->attributes[BlockAttrs::Y_POSITION] = std::to_string(yPosition);
-	}
-	Block::Block(std::string blockID,std::string xPosition,std::string yPosition) {
-		this->attributes[BlockAttrs::BLOCK_ID] = blockID;
-		this->attributes[BlockAttrs::X_POSITION] = xPosition;
-		this->attributes[BlockAttrs::Y_POSITION] = yPosition;
-	}
+	return strbuild;
 
-	Block::operator std::string() {
-		std::string out;
-		for(auto& [key, val] : this->attributes) {
-			out += key+std::string(",")+val+std::string(",");
-		}
-		out.pop_back();
-		return out;
-	}
+}
 
+int Level::uploadLevel(std::string username,std::string password,LevelOptions options) {
+	std::string out = buildUploadQueryString(options,username,password,*this,this->levelName);
+	int levelid = std::stoi(httpRequest("/database/uploadGJLevel21.php",out));
+	return levelid;
+}
 
-	std::string& Header::operator [] (std::string attribute) {
-		return this->attributes[attribute];
-	}
-	Header& Header::operator= (const std::string& str) {
-		attributes = splitToMap(str,',');
-		return *this;
-	}
-	Header& Header::operator= (const std::unordered_map<std::string,std::string>& attrs) {
-		this->attributes = attrs;
-		return *this;
-	}
-	Header& Header::operator += (const std::unordered_map<std::string,std::string>& attrs) {
-		for(auto& [key, val] : attrs) {
-			this->attributes[key] = val;
-		}
+int Level::uploadLevel(std::string username,std::string password) {
+	LevelOptions options;
+	return uploadLevel(username,password,options);
+}
 
-		return *this;
-	}
-	Header::Header() {
-		this->attributes = GD::DefaultHeader;
-	}
-	Header::operator std::string() {
-		std::string out;
-		for(auto& [key, val] : this->attributes) {
-			out += key+std::string(",")+val+std::string(",");
-		}
-		out.pop_back();
-		return out;
-	}
+Level& Level::downloadLevel(std::string levelID) {
+	std::string query = "gameVersion=21&binaryVersion=35&gdw=0&levelID="+levelID+"&inc=0&extras=0&secret=Wmfd2893gb7";
+	std::string reqOutput = httpRequest("/database/downloadGJLevel22.php",query);
+	std::vector<std::string> list = split(reqOutput,':');
+	if(reqOutput.size()<5)
+		throw std::runtime_error("Invalid Level ID");
+	GDCrypto::LevelDecoder level_decoder;
+	Level* l = new Level("GDLevel");
+	l->levelName = list[3];
+	*l = (level_decoder << list[7]).digestAsString();
+	return *l;
+}
+Level& Level::downloadLevel(int levelID) {
+	return Level::downloadLevel(std::to_string(levelID));
+}
 
-
-	Level::Level(std::string levelName) {
-		this->levelName = levelName;
-
-	}
-	void Level::addBlock(Block b) {
-		this->blocks.push_back(b);
-	}
-	Level& Level::operator= (const std::string& str) {
-		std::vector<std::string> stuff = split(str,';');
-		this->header = stuff[0];
-		stuff.erase(stuff.begin());
-		this->blocks.reserve(stuff.size());
-		for(std::string objstr : stuff) {
-			if(objstr.size()) {
-				Block blk;
-				blk = objstr;
-				this->blocks.emplace_back(blk);
-			}
-		}
-		return *this;
-	}
-	Level::operator std::string() {
-		std::string strbuild = this->header;
-		strbuild+=";";
-		for(Block blk : this->blocks) {
-			strbuild += blk;
-			strbuild += ";";
-		}
-		return strbuild;
-
-	}
-	int Level::uploadLevel(std::string username,std::string password,LevelOptions options) {
-		std::string out = buildUploadQueryString(options,username,password,*this,this->levelName);
-		int levelid = std::stoi(httpRequest("/database/uploadGJLevel21.php",out));
-		return levelid;
-	}
-	int Level::uploadLevel(std::string username,std::string password) {
-		LevelOptions options;
-		return uploadLevel(username,password,options);
-	}
-	Level& Level::downloadLevel(std::string levelID) {
-		std::string query = "gameVersion=21&binaryVersion=35&gdw=0&levelID="+levelID+"&inc=0&extras=0&secret=Wmfd2893gb7";
-		std::string reqOutput = httpRequest("/database/downloadGJLevel22.php",query);
-		GDCrypto::LevelDecoder level_decoder;
-		Level* l = new Level();
-		*l = (level_decoder << split(reqOutput,':')[7]).digestAsString();
-		return *l;
-;	}
-	Level& Level::downloadLevel(int levelID) {
-		return Level::downloadLevel(std::to_string(levelID));
-	}
+int Misc::getSongFromLevel(std::string lvlid) {
+	std::string query = "gameVersion=21&binaryVersion=35&gdw=0&levelID="+lvlid+"&inc=0&extras=0&secret=Wmfd2893gb7";
+	std::string reqOutput = httpRequest("/database/downloadGJLevel22.php",query);
+	if(reqOutput.size()<5)
+		throw std::runtime_error("Invalid Level ID");
+	return std::stoi(split(reqOutput,':')[49]);
+}
+int Misc::getSongFromLevel(int lvlid) {
+	return getSongFromLevel(std::to_string(lvlid));
 }

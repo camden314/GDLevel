@@ -2,16 +2,17 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <utility>
 namespace GD {
 	typedef struct LevelOptions {
-	std::string description="";
-	int stars=0;
-	bool unlisted=false;
-	int levelpassword=0;
-	int songid=0;
-	int audiotrack=1;
-	bool twoPlayer=false;
-	int coins=0;
+		std::string description="";
+		int stars=0;
+		bool unlisted=false;
+		int levelpassword=0;
+		int songid=0;
+		int audiotrack=1;
+		bool twoPlayer=false;
+		int coins=0;
 	} LevelOptions;
 	class Block {
 	private:
@@ -22,6 +23,7 @@ namespace GD {
 		Block(std::string blockID,std::string xPosition,std::string yPosition);
 		std::string& operator [] (std::string attribute);
 		operator std::string();
+		operator std::unordered_map<std::string,std::string>();
 		Block& operator= (const std::string& str);
 		Block& operator= (const std::unordered_map<std::string,std::string>& attrs);
 		Block& operator += (const std::unordered_map<std::string,std::string>& attrs);
@@ -41,9 +43,9 @@ namespace GD {
 	class Level {
 	public:
 		Header header;
-		std::vector<Block> blocks;
+		std::vector<Block*> blocks;
 		std::string levelName;
-		void addBlock(Block b);
+		void addBlock(Block* b);
 		Level(std::string levelName="GDLevel");
 		int uploadLevel(std::string username,std::string password,LevelOptions options);
 		int uploadLevel(std::string username,std::string password);
@@ -52,4 +54,8 @@ namespace GD {
 		static Level& downloadLevel(int levelID);
 		static Level& downloadLevel(std::string levelID);
 	};
+	namespace Misc {
+		int getSongFromLevel(int lvlid);
+		int getSongFromLevel(std::string lvlid);
+	}
 }
