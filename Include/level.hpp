@@ -55,7 +55,7 @@ namespace GD {
 		static Level& downloadLevel(std::string levelID);
 	};
 	namespace Misc {
-		int getSongFromLevel(int lvlid);
-		int getSongFromLevel(std::string lvlid);
+		LevelOptions optionsFromLevel(int lvlid);
+		LevelOptions optionsFromLevel(std::string lvlid);
 	}
 }

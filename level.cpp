@@ -8,29 +8,31 @@
 #include <assert.h>
 
 using namespace GD;
+httplib::Client cli("boomlings.com", 80);
 std::unordered_map<std::string,std::string> splitToMap(const std::string &s, char delim) {
     std::istringstream iss(s);
-    std::string item;
-    std::string item2;
+    std::string item, item2;
     std::unordered_map<std::string,std::string> out;
     while (std::getline(iss, item, delim) && std::getline(iss, item2, delim)) {
-        out[item] = item2;
+        out.insert(std::make_pair(item,item2));
     }
     return out;
 }
-std::vector<std::string> split (const std::string &s, char delim) {
-    std::vector<std::string> result;
-    std::stringstream ss (s);
-    std::string item;
-
-    while (getline (ss, item, delim)) {
-        result.push_back (item);
+std::vector<std::string> split( std::string const& original, char separator )
+{
+    std::vector<std::string> results;
+    std::string::const_iterator start = original.begin();
+    std::string::const_iterator end = original.end();
+    std::string::const_iterator next = std::find( start, end, separator );
+    while ( next != end ) {
+        results.push_back( std::string( start, next ) );
+        start = next + 1;
+        next = std::find( start, end, separator );
     }
-
-    return result;
+    results.push_back( std::string( start, next ) );
+    return results;
 }
 std::string httpRequest(std::string url,std::string params) {
-	httplib::Client cli("boomlings.com", 80);
 	auto res = cli.Post(url.c_str(), params.c_str(), "application/x-www-form-urlencoded");
 	if (res && res->status == 200) {
 	        return res->body;
@@ -42,8 +44,8 @@ std::string grabAccountID(std::string username) {
 	std::string query = "gameVersion=21&binaryVersion=35&gdw=0&str="+username+"&total=0&page=0&secret=Wmfd2893gb7";
 	std::string response = httpRequest("/database/getGJUsers20.php",query);
 	try {
-		return split(response,':')[21];
-	} catch(const std::out_of_range& e) {
+		return splitToMap(response,':')["16"];
+	} catch(const std::exception& e) {
 		throw std::runtime_error("Invalid Username");
 	}
 }
@@ -199,26 +201,41 @@ int Level::uploadLevel(std::string username,std::string password) {
 Level& Level::downloadLevel(std::string levelID) {
 	std::string query = "gameVersion=21&binaryVersion=35&gdw=0&levelID="+levelID+"&inc=0&extras=0&secret=Wmfd2893gb7";
 	std::string reqOutput = httpRequest("/database/downloadGJLevel22.php",query);
-	std::vector<std::string> list = split(reqOutput,':');
+
+	std::unordered_map<std::string,std::string> list = splitToMap(reqOutput,':');
+
 	if(reqOutput.size()<5)
 		throw std::runtime_error("Invalid Level ID");
+
 	GDCrypto::LevelDecoder level_decoder;
 	Level* l = new Level("GDLevel");
-	l->levelName = list[3];
-	*l = (level_decoder << list[7]).digestAsString();
+	l->levelName = list["2"];
+	*l = (level_decoder << list["4"]).digestAsString();
+
 	return *l;
 }
 Level& Level::downloadLevel(int levelID) {
 	return Level::downloadLevel(std::to_string(levelID));
 }
 
-int Misc::getSongFromLevel(std::string lvlid) {
+LevelOptions Misc::optionsFromLevel(std::string lvlid) {
 	std::string query = "gameVersion=21&binaryVersion=35&gdw=0&levelID="+lvlid+"&inc=0&extras=0&secret=Wmfd2893gb7";
 	std::string reqOutput = httpRequest("/database/downloadGJLevel22.php",query);
+
 	if(reqOutput.size()<5)
 		throw std::runtime_error("Invalid Level ID");
-	return std::stoi(split(reqOutput,':')[49]);
+
+	std::unordered_map<std::string,std::string> resp = splitToMap(reqOutput,':');
+
+	LevelOptions opts;
+	opts.description = resp["3"];
+	opts.stars = std::stoi(resp["39"]);
+	opts.levelpassword = std::stoi(resp["27"]);
+	opts.songid = std::stoi(resp["35"]);
+	opts.audiotrack = std::stoi(resp["12"]);
+
+	return opts;
 }
-int Misc::getSongFromLevel(int lvlid) {
-	return getSongFromLevel(std::to_string(lvlid));
+LevelOptions Misc::optionsFromLevel(int lvlid) {
+	return optionsFromLevel(std::to_string(lvlid));
 }
